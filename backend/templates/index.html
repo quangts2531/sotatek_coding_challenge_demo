@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ZeroMatch – Công cụ phát hiện mẫu Zero-Shot</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#e1e1ed",
+                        "surface-bright": "#373941",
+                        "surface-variant": "#33343d",
+                        "error-container": "#93000a",
+                        "primary-container": "#508ff8",
+                        "surface-dim": "#11131b",
+                        "background": "#11131b",
+                        "secondary": "#c9beff",
+                        "on-secondary": "#2f009b",
+                        "on-tertiary": "#680009",
+                        "surface-container-highest": "#33343d",
+                        "surface-container": "#1d1f27",
+                        "inverse-surface": "#e1e1ed",
+                        "on-surface-variant": "#c2c6d5",
+                        "surface-tint": "#acc7ff",
+                        "on-tertiary-fixed": "#410004",
+                        "on-tertiary-container": "#5c0007",
+                        "primary-fixed-dim": "#acc7ff",
+                        "secondary-container": "#481ecb",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "outline": "#8c909e",
+                        "on-secondary-container": "#bbaeff",
+                        "on-tertiary-fixed-variant": "#930012",
+                        "on-primary-fixed-variant": "#004492",
+                        "on-background": "#e1e1ed",
+                        "surface-container-high": "#282a32",
+                        "surface": "#11131b",
+                        "on-secondary-fixed-variant": "#461ac9",
+                        "surface-container-lowest": "#0c0e15",
+                        "inverse-on-surface": "#2e3039",
+                        "on-secondary-fixed": "#1b0063",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-container-low": "#191b23",
+                        "secondary-fixed": "#e5deff",
+                        "tertiary": "#ffb3ad",
+                        "on-primary-container": "#00285b",
+                        "outline-variant": "#424753",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#c9beff",
+                        "on-primary-fixed": "#001a40",
+                        "primary": "#acc7ff",
+                        "tertiary-container": "#ff5450",
+                        "inverse-primary": "#005bbf",
+                        "on-primary": "#002f68",
+                        "primary-fixed": "#d7e2ff",
+                        "industrial-gray": "#8892A4",
+                        "border-deep": "#2A2D3A",
+                        "panel-dark": "#1C1E26",
+                        "viewport-dark": "#0F1117"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "8px",
+                        "lg": "8px",
+                        "xl": "12px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Space Grotesk"],
+                        "headline-sm": ["Space Grotesk"],
+                        "display-lg": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "body-sm": ["Space Grotesk"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-lg": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    fontSize: {
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "code-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "letterSpacing": "0.15em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #11131b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #508ff8;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #acc7ff;
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #4F8EF7 0%, #7B5FFF 100%);
+            box-shadow: 0 0 12px rgba(7F, 142, 247, 0.25);
+        }
+
+        .dot-grid {
+            background-image: radial-gradient(#2A2D3A 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-surface-dim text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden h-screen w-screen flex flex-col md:flex-row">
+    <!-- LEFT PANEL (Control Console) -->
+    <aside
+        class="w-full md:w-[400px] h-screen bg-panel-dark border-r-2 border-border-deep flex flex-col z-20 overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 flex items-center justify-between border-b border-outline-variant/20">
+            <h1 class="font-headline-sm text-headline-sm tracking-tighter text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined">target</span>
+                ZeroMatch
+            </h1>
+            <span class="font-code-sm text-code-sm text-industrial-gray">v4.2.0</span>
+        </div>
+        <!-- Scrollable Controls -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-8">
+            <!-- BẢNG MẪU GỐC (Pattern Reference) -->
+            <section class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-industrial-gray text-sm">filter_center_focus</span>
+                    <h3 class="font-label-caps text-label-caps text-industrial-gray uppercase">Bảng mẫu gốc</h3>
+                </div>
+                <div
+                    class="h-48 border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50">
+                    <span
+                        class="material-symbols-outlined text-4xl text-primary-container group-hover:scale-110 transition-transform">add_photo_alternate</span>
+                    <p class="font-headline-sm text-sm text-on-surface font-bold">Tải lên mẫu gốc</p>
+                    <p class="font-body-sm text-xs text-industrial-gray">Ảnh tham chiếu để tìm kiếm</p>
+                </div>
+            </section>
+            <!-- LINH KIỆN & TÌM KIẾM (Target Drawing & Search Action) -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-industrial-gray text-sm">architecture</span>
+                    <h3 class="font-label-caps text-label-caps text-industrial-gray uppercase">Linh kiện</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4 items-center">
+                    <!-- Left Column: Drawing Upload Card -->
+                    <div
+                        class="aspect-square border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50">
+                        <span
+                            class="material-symbols-outlined text-[20px] text-industrial-gray group-hover:text-primary transition-colors">map</span>
+                        <p class="font-headline-sm text-[10px] text-on-surface font-bold uppercase">Bản vẽ</p>
+                    </div>
+                    <!-- Right Column: Search Button and Progress Bar -->
+                    <div class="flex flex-col gap-4">
+                        <button
+                            class="w-full h-11 gradient-btn rounded-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg group">
+                            <span class="material-symbols-outlined text-[20px] group-hover:animate-pulse">search</span>
+                            <span class="font-headline-sm text-[12px] font-bold tracking-[1px] uppercase">Tìm
+                                kiếm</span>
+                        </button>
+                        <div class="space-y-3 bg-viewport-dark/30 p-3 rounded-lg border border-border-deep">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(79,142,247,0.8)]"></span>
+                                    <span
+                                        class="font-code-sm text-[10px] text-on-surface uppercase tracking-widest">Đang
+                                        xử lý...</span>
+                                </div>
+                                <span class="font-code-sm text-xs text-primary font-bold">45%</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-border-deep rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-primary w-[45%] transition-all duration-500 shadow-[0_0_8px_rgba(79,142,247,0.4)]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- DETECTION SETTINGS -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-industrial-gray text-sm">settings_suggest</span>
+                    <h3 class="font-label-caps text-label-caps text-industrial-gray uppercase">Cấu hình phát hiện</h3>
+                </div>
+                <div class="space-y-4 bg-viewport-dark/30 p-4 rounded-lg border border-border-deep">
+                    <!-- Confidence Threshold -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between font-code-sm text-xs">
+                            <span class="text-on-surface-variant">Độ tin cậy</span>
+                            <span class="text-primary">0.50</span>
+                        </div>
+                        <input
+                            class="w-full h-1.5 bg-border-deep rounded-lg appearance-none cursor-pointer accent-primary"
+                            max="1" min="0" step="0.01" type="range" value="0.5">
+                    </div>
+                    <!-- Toggles -->
+                    <div class="space-y-3 pt-2">
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span
+                                class="font-body-sm text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">Phân
+                                tích đa quy mô</span>
+                            <div class="relative inline-flex h-4 w-8 items-center rounded-full bg-primary-container">
+                                <span
+                                    class="translate-x-4 inline-block h-3 w-3 transform rounded-full bg-white transition"></span>
+                            </div>
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span
+                                class="font-body-sm text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">Bất
+                                biến xoay</span>
+                            <div class="relative inline-flex h-4 w-8 items-center rounded-full bg-border-deep">
+                                <span
+                                    class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-on-surface-variant transition"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+            <!-- EXAMPLE LIST -->
+            <section class="space-y-3 pb-8">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-industrial-gray text-sm">bolt</span>
+                    <h3 class="font-label-caps text-label-caps text-industrial-gray uppercase">Danh sách mẫu</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button
+                        class="bg-viewport-dark border border-border-deep rounded p-3 text-left hover:bg-surface-variant transition-colors group"
+                        style="transform: scale(1);">
+                        <p class="font-body-sm text-xs text-on-surface-variant group-hover:text-on-surface">Điện trở</p>
+                    </button>
+                    <button
+                        class="bg-viewport-dark border border-border-deep rounded p-3 text-left hover:bg-surface-variant transition-colors group"
+                        style="transform: scale(1);">
+                        <p class="font-body-sm text-xs text-on-surface-variant group-hover:text-on-surface">Tụ điện</p>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </aside>
+    <!-- RIGHT PANEL (Main Viewport) -->
+    <main class="flex-1 h-screen bg-viewport-dark flex flex-col dot-grid relative overflow-hidden">
+        <!-- Tab Bar Navigation -->
+        <nav class="h-14 bg-panel-dark border-b-2 border-border-deep flex items-center justify-between px-6 z-10">
+            <div class="flex h-full items-center gap-8">
+                <button class="h-full border-b-2 border-primary px-4 flex items-center gap-2 text-primary"
+                    style="transform: scale(1);">
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    <span class="font-label-caps text-label-caps tracking-widest">VIEW</span>
+                </button>
+                <button
+                    class="h-full border-b-2 border-transparent px-4 flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors"
+                    style="transform: scale(1);">
+                    <span class="material-symbols-outlined text-[20px]">terminal</span>
+                    <span class="font-label-caps text-label-caps tracking-widest">LOG</span>
+                </button>
+                <button
+                    class="h-full border-b-2 border-transparent px-4 flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">list</span>
+                    <span class="font-label-caps text-label-caps tracking-widest">LIST</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-viewport-dark px-3 py-1.5 rounded border border-border-deep">
+                    <span
+                        class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(79,142,247,0.8)]"></span>
+                    <span class="font-code-sm text-[10px] text-primary tracking-widest uppercase">Hệ thống sẵn
+                        sàng</span>
+                </div>
+            </div>
+        </nav>
+        <!-- Main Workspace (Kết quả) -->
+        <div class="flex-1 flex flex-col items-center justify-center p-8 overflow-hidden relative">
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03]">
+                <h2 class="font-display-lg text-[12vw] uppercase select-none">KẾT QUẢ</h2>
+            </div>
+            <div class="relative group cursor-default z-10 w-full max-w-4xl flex flex-col items-center">
+                <!-- Empty State Content -->
+                <div
+                    class="relative w-full aspect-video flex flex-col items-center justify-center rounded-xl border border-border-deep bg-panel-dark/40 backdrop-blur-sm shadow-2xl overflow-hidden">
+                    <div class="relative z-10 text-center space-y-4 px-12">
+                        <div
+                            class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-primary/30 bg-primary/5">
+                            <span class="material-symbols-outlined text-4xl text-primary">analytics</span>
+                        </div>
+                        <h2 class="font-display-lg text-4xl text-on-surface tracking-tight uppercase">Kết Quả Hệ Thống
+                        </h2>
+                        <p class="font-body-md text-on-surface-variant max-w-lg mx-auto">
+                            Tải lên mẫu gốc và bản vẽ linh kiện để bắt đầu quá trình phát hiện.
+                            Kết quả sẽ được hiển thị trực tiếp tại khu vực này.
+                        </p>
+                        <div class="pt-8 flex flex-wrap justify-center gap-4">
+                            <div
+                                class="px-4 py-2 bg-viewport-dark/80 border border-border-deep rounded flex items-center gap-3">
+                                <span class="font-code-sm text-[10px] text-industrial-gray uppercase">Trạng thái</span>
+                                <span class="font-code-sm text-xs text-secondary font-bold">READY_TO_INFER</span>
+                            </div>
+                            <div
+                                class="px-4 py-2 bg-viewport-dark/80 border border-border-deep rounded flex items-center gap-3">
+                                <span class="font-code-sm text-[10px] text-industrial-gray uppercase">VRAM</span>
+                                <span class="font-code-sm text-xs text-primary">0.4/8.0 GB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative Corners -->
+                    <div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary/40"></div>
+                    <div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary/40"></div>
+                    <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary/40"></div>
+                    <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary/40"></div>
+                </div>
+            </div>
+        </div>
+        <!-- System Log Overlay -->
+    </main>
+    <script>
+        // Micro-interactions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.97)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>
