@@ -153,11 +153,25 @@
                     <h3 class="font-label-caps text-label-caps text-industrial-gray uppercase">Bảng mẫu gốc</h3>
                 </div>
                 <div
-                    class="h-48 border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50">
-                    <span
-                        class="material-symbols-outlined text-4xl text-primary-container group-hover:scale-110 transition-transform">add_photo_alternate</span>
-                    <p class="font-headline-sm text-sm text-on-surface font-bold">Tải lên mẫu gốc</p>
-                    <p class="font-body-sm text-xs text-industrial-gray">Ảnh tham chiếu để tìm kiếm</p>
+                    id="pattern-zone"
+                    class="h-48 border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50 relative overflow-hidden">
+                    <!-- Empty state -->
+                    <div id="pattern-empty" class="flex flex-col items-center gap-2 pointer-events-none">
+                        <span
+                            class="material-symbols-outlined text-4xl text-primary-container group-hover:scale-110 transition-transform">add_photo_alternate</span>
+                        <p class="font-headline-sm text-sm text-on-surface font-bold">Tải lên mẫu gốc</p>
+                        <p class="font-body-sm text-xs text-industrial-gray">Ảnh tham chiếu để tìm kiếm</p>
+                    </div>
+                    <!-- Preview state (hidden by default) -->
+                    <div id="pattern-preview" class="hidden absolute inset-0 bg-viewport-dark">
+                        <img id="pattern-img" class="w-full h-full object-contain" src="" alt="Pattern preview">
+                        <div class="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 py-1.5 bg-black/60 backdrop-blur-sm">
+                            <span id="pattern-filename" class="font-code-sm text-[10px] text-on-surface truncate max-w-[160px]"></span>
+                            <button id="pattern-remove" class="ml-2 flex-shrink-0 text-error hover:text-white transition-colors" title="Xoá ảnh">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
             <!-- LINH KIỆN & TÌM KIẾM (Target Drawing & Search Action) -->
@@ -169,18 +183,32 @@
                 <div class="grid grid-cols-2 gap-4 items-center">
                     <!-- Left Column: Drawing Upload Card -->
                     <div
-                        class="aspect-square border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50">
-                        <span
-                            class="material-symbols-outlined text-[20px] text-industrial-gray group-hover:text-primary transition-colors">map</span>
-                        <p class="font-headline-sm text-[10px] text-on-surface font-bold uppercase">Bản vẽ</p>
+                        id="drawing-zone"
+                        class="aspect-square border-2 border-dashed border-border-deep rounded-lg flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-colors cursor-pointer group bg-viewport-dark/50 relative overflow-hidden">
+                        <!-- Empty state -->
+                        <div id="drawing-empty" class="flex flex-col items-center gap-1 pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-[20px] text-industrial-gray group-hover:text-primary transition-colors">map</span>
+                            <p class="font-headline-sm text-[10px] text-on-surface font-bold uppercase">Bản vẽ</p>
+                        </div>
+                        <!-- Preview state (hidden by default) -->
+                        <div id="drawing-preview" class="hidden absolute inset-0 bg-viewport-dark">
+                            <img id="drawing-img" class="w-full h-full object-contain" src="" alt="Drawing preview">
+                            <div class="absolute bottom-0 left-0 right-0 flex items-center justify-between px-2 py-1 bg-black/60 backdrop-blur-sm">
+                                <span id="drawing-filename" class="font-code-sm text-[10px] text-on-surface truncate max-w-[80px]"></span>
+                                <button id="drawing-remove" class="ml-1 flex-shrink-0 text-error hover:text-white transition-colors" title="Xoá ảnh">
+                                    <span class="material-symbols-outlined text-[14px]">close</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <!-- Right Column: Search Button and Progress Bar -->
                     <div class="flex flex-col gap-4">
                         <button
+                            id="run-detection-btn"
                             class="w-full h-11 gradient-btn rounded-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg group">
-                            <span class="material-symbols-outlined text-[20px] group-hover:animate-pulse">search</span>
-                            <span class="font-headline-sm text-[12px] font-bold tracking-[1px] uppercase">Tìm
-                                kiếm</span>
+                            <span id="run-btn-icon" class="material-symbols-outlined text-[20px] group-hover:animate-pulse">search</span>
+                            <span id="run-btn-label" class="font-headline-sm text-[12px] font-bold tracking-[1px] uppercase">Tìm kiếm</span>
                         </button>
                         <div class="space-y-3 bg-viewport-dark/30 p-3 rounded-lg border border-border-deep">
                             <div class="flex items-center justify-between">
@@ -337,18 +365,161 @@
         </div>
         <!-- System Log Overlay -->
     </main>
+    <!-- Hidden file inputs -->
+    <input type="file" id="pattern-input" accept="image/*" class="hidden">
+    <input type="file" id="drawing-input" accept="image/*" class="hidden">
+
     <script>
-        // Micro-interactions
+        // ── Micro-interactions ──────────────────────────────────────────────
         document.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('mousedown', () => {
-                btn.style.transform = 'scale(0.97)';
+            btn.addEventListener('mousedown', () => { btn.style.transform = 'scale(0.97)'; });
+            btn.addEventListener('mouseup',   () => { btn.style.transform = 'scale(1)'; });
+            btn.addEventListener('mouseleave',() => { btn.style.transform = 'scale(1)'; });
+        });
+
+        // ── Global file state ───────────────────────────────────────────────
+        window.patternFile = null;
+        window.drawingFile = null;
+
+        // ── Toast system ────────────────────────────────────────────────────
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container') || createToastContainer();
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? '#c0392b' : '#27ae60';
+            toast.style.cssText = [
+                'display:flex', 'align-items:center', 'gap:10px',
+                `background:${bg}`, 'color:#fff',
+                'padding:10px 16px', 'border-radius:8px',
+                'font-family:JetBrains Mono,monospace', 'font-size:12px',
+                'box-shadow:0 4px 20px rgba(0,0,0,0.4)',
+                'transform:translateX(120%)', 'transition:transform 0.3s cubic-bezier(.22,1,.36,1)',
+                'max-width:320px', 'pointer-events:auto'
+            ].join(';');
+            const icon = type === 'error' ? 'error' : 'check_circle';
+            toast.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;flex-shrink:0">${icon}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; });
             });
-            btn.addEventListener('mouseup', () => {
-                btn.style.transform = 'scale(1)';
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            }, 3000);
+        }
+
+        function createToastContainer() {
+            const el = document.createElement('div');
+            el.id = 'toast-container';
+            el.style.cssText = [
+                'position:fixed', 'bottom:24px', 'right:24px', 'z-index:9999',
+                'display:flex', 'flex-direction:column', 'gap:10px',
+                'pointer-events:none'
+            ].join(';');
+            document.body.appendChild(el);
+            return el;
+        }
+
+        // ── Upload zone factory ─────────────────────────────────────────────
+        function setupUploadZone({ zoneId, inputId, emptyId, previewId, imgId, filenameId, removeId, fileKey, truncateLen }) {
+            const zone      = document.getElementById(zoneId);
+            const input     = document.getElementById(inputId);
+            const emptyEl   = document.getElementById(emptyId);
+            const previewEl = document.getElementById(previewId);
+            const imgEl     = document.getElementById(imgId);
+            const nameEl    = document.getElementById(filenameId);
+            const removeBtn = document.getElementById(removeId);
+
+            function truncate(name, max) {
+                return name.length > max ? name.slice(0, max - 1) + '…' : name;
+            }
+
+            function applyFile(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    showToast('Vui lòng chọn file ảnh hợp lệ (PNG, JPG...).');
+                    return;
+                }
+                window[fileKey] = file;
+                const url = URL.createObjectURL(file);
+                imgEl.src = url;
+                nameEl.textContent = truncate(file.name, truncateLen);
+                emptyEl.classList.add('hidden');
+                previewEl.classList.remove('hidden');
+            }
+
+            function resetZone() {
+                window[fileKey] = null;
+                imgEl.src = '';
+                input.value = '';
+                previewEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                zone.style.borderColor = '';
+                zone.style.boxShadow = '';
+            }
+
+            // Click zone → open file picker
+            zone.addEventListener('click', (e) => {
+                if (e.target.closest('#' + removeId)) return; // don't bubble from X
+                input.click();
             });
-            btn.addEventListener('mouseleave', () => {
-                btn.style.transform = 'scale(1)';
+
+            // File input change
+            input.addEventListener('change', () => {
+                if (input.files && input.files[0]) applyFile(input.files[0]);
             });
+
+            // Remove button — stop propagation so click doesn't reopen picker
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetZone();
+            });
+
+            // Drag & drop
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.style.borderColor = '#4F8EF7';
+                zone.style.boxShadow = '0 0 0 3px rgba(79,142,247,0.25)';
+            });
+            zone.addEventListener('dragleave', () => {
+                zone.style.borderColor = '';
+                zone.style.boxShadow = '';
+            });
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.style.borderColor = '';
+                zone.style.boxShadow = '';
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file) applyFile(file);
+            });
+        }
+
+        // ── Init both zones ─────────────────────────────────────────────────
+        setupUploadZone({
+            zoneId: 'pattern-zone', inputId: 'pattern-input',
+            emptyId: 'pattern-empty', previewId: 'pattern-preview',
+            imgId: 'pattern-img', filenameId: 'pattern-filename',
+            removeId: 'pattern-remove', fileKey: 'patternFile', truncateLen: 22
+        });
+
+        setupUploadZone({
+            zoneId: 'drawing-zone', inputId: 'drawing-input',
+            emptyId: 'drawing-empty', previewId: 'drawing-preview',
+            imgId: 'drawing-img', filenameId: 'drawing-filename',
+            removeId: 'drawing-remove', fileKey: 'drawingFile', truncateLen: 14
+        });
+
+        // ── Run Detection validation ────────────────────────────────────────
+        document.getElementById('run-detection-btn').addEventListener('click', () => {
+            if (!window.patternFile) {
+                showToast('Vui lòng tải lên ảnh mẫu gốc', 'error');
+                return;
+            }
+            if (!window.drawingFile) {
+                showToast('Vui lòng tải lên bản vẽ', 'error');
+                return;
+            }
+            // Both files present — hand off to API call (to be wired up next)
+            console.log('[ZeroMatch] Both files ready. Proceeding to detection...');
+            showToast('Đang khởi động phát hiện...', 'success');
         });
     </script>
 
