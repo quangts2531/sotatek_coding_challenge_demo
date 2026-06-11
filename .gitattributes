@@ -1,1 +1,2 @@
 *.onnx filter=lfs diff=lfs merge=lfs -text
+backend/trained_models_fs/keypoints_onnx_32.onnx filter=lfs diff=lfs merge=lfs -text
