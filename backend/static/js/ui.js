@@ -12,6 +12,26 @@ window.AppState.selectedExample = null;
 window.patternFile = null;
 window.drawingFile = null;
 
+window.updateSystemReadyStatus = function() {
+    const dot = document.getElementById('system-status-dot');
+    const text = document.getElementById('system-status-text');
+    if (!dot || !text) return;
+
+    if (window.patternFile && window.drawingFile) {
+        dot.className = "w-2 h-2 rounded-full bg-[#10B981] animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-300";
+        text.className = "font-code-sm text-[10px] text-[#10B981] tracking-widest uppercase transition-all duration-300";
+        text.textContent = "Hệ thống sẵn sàng";
+    } else {
+        dot.className = "w-2 h-2 rounded-full bg-[#8E9AA8] transition-all duration-300";
+        text.className = "font-code-sm text-[10px] text-[#8E9AA8] tracking-widest uppercase transition-all duration-300";
+        text.textContent = "Hệ thống chưa sẵn sàng";
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.updateSystemReadyStatus();
+});
+
 // ── Micro-interactions ──────────────────────────────────────────────
 document.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mousedown', () => { btn.style.transform = 'scale(0.97)'; });
@@ -117,39 +137,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const exampleData = {
-    'Điện trở': { color: '#4F8EF7' },
-    'Tụ điện': { color: '#7B5FFF' },
+    'Điện trở': { color: '#4F8EF7', path: '/static/image/dien_tro.png', filename: 'dien_tro.png' },
+    'Tụ điện': { color: '#7B5FFF', path: '/static/image/tu_dien.png', filename: 'tu_dien.png' },
 };
 
 function createExampleImage(label, color) {
+    // Keep this function for safety or unused reference, but we load actual images now
     const canvas = document.createElement('canvas');
     canvas.width = 128;
     canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#1C1E26';
-    ctx.fillRect(0, 0, 128, 128);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    if (label === 'Điện trở') {
-        ctx.beginPath();
-        ctx.moveTo(20, 64); ctx.lineTo(40, 64);
-        ctx.lineTo(45, 44); ctx.lineTo(55, 84);
-        ctx.lineTo(65, 44); ctx.lineTo(75, 84);
-        ctx.lineTo(85, 44); ctx.lineTo(90, 64);
-        ctx.lineTo(108, 64);
-        ctx.stroke();
-    } else if (label === 'Tụ điện') {
-        ctx.beginPath();
-        ctx.moveTo(20, 64); ctx.lineTo(55, 64);
-        ctx.moveTo(55, 44); ctx.lineTo(55, 84);
-        ctx.moveTo(73, 44); ctx.lineTo(73, 84);
-        ctx.moveTo(73, 64); ctx.lineTo(108, 64);
-        ctx.stroke();
-    }
-    ctx.fillStyle = color;
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, 64, 115);
     return canvas.toDataURL('image/png');
 }
 
@@ -190,6 +186,11 @@ function resetDrawingUpload() {
     if (imgEl) imgEl.src = '';
     if (nameEl) nameEl.textContent = '';
     if (input) input.value = '';
+
+    const tabFiltered = document.getElementById('view-tab-filtered');
+    if (tabFiltered) tabFiltered.classList.add('hidden');
+    if (window.selectTab) window.selectTab('all');
+    if (window.updateSystemReadyStatus) window.updateSystemReadyStatus();
 }
 
 function setExampleActive(el, label) {
@@ -207,14 +208,24 @@ function setExampleActive(el, label) {
     if (p) {
         p.style.setProperty('color', '#ffffff', 'important');
     }
-    const dataUrl = createExampleImage(label, exampleData[label].color);
-    fetch(dataUrl)
+    
+    const imgPath = exampleData[label].path;
+    const imgName = exampleData[label].filename;
+    
+    fetch(imgPath)
         .then(r => r.blob())
         .then(blob => {
-            const file = new File([blob], label + '.png', { type: 'image/png' });
+            const file = new File([blob], imgName, { type: 'image/png' });
             window.drawingFile = file;
-            showDrawingPreview(dataUrl, label + '.png');
+            showDrawingPreview(imgPath, imgName);
             window.showToast(label + ' đã được tải lên', 'success');
+            if (window.updateSystemReadyStatus) window.updateSystemReadyStatus();
+            
+            // No auto-trigger on selecting example component
+        })
+        .catch(err => {
+            console.error('Failed to load example image:', err);
+            window.showToast('Không thể tải ảnh mẫu: ' + label, 'error');
         });
 }
 

@@ -6,9 +6,9 @@
     <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03]">
         <h2 class="font-display-lg text-[12vw] uppercase select-none">KẾT QUẢ</h2>
     </div>
-    <div class="relative group cursor-default z-10 w-full max-w-4xl flex flex-col items-center">
+    <div class="relative group cursor-default z-10 w-full h-full flex flex-col items-center justify-center max-w-none">
         <!-- Empty State (shown before detection) -->
-        <div id="result-empty" class="relative w-full aspect-video flex flex-col items-center justify-center rounded-xl border border-border-deep bg-panel-dark/40 backdrop-blur-sm shadow-2xl overflow-hidden">
+        <div id="result-empty" class="relative w-full max-w-4xl aspect-video flex flex-col items-center justify-center rounded-xl border border-border-deep bg-panel-dark/40 backdrop-blur-sm shadow-2xl overflow-hidden">
             <div class="relative z-10 text-center space-y-4 px-12">
                 <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-primary/30 bg-primary/5">
                     <span class="material-symbols-outlined text-4xl text-primary">analytics</span>
@@ -37,26 +37,54 @@
         </div>
 
         <!-- Result State (shown after detection) -->
-        <div id="result-content" class="hidden w-full flex flex-row gap-4" style="height: calc(100vh - 8rem);">
-            <!-- Result Image (left side) -->
-            <div class="relative flex-1 min-w-0 rounded-xl border border-border-deep bg-panel-dark/40 backdrop-blur-sm shadow-2xl overflow-hidden flex items-center justify-center">
-                <img id="result-image" class="w-full h-full object-contain" src="" alt="Detection result">
-                <!-- Decorative Corners -->
-                <div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary/40"></div>
-                <div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary/40"></div>
-                <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary/40"></div>
-                <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary/40"></div>
+        <div id="result-content" class="hidden w-full h-full flex flex-row gap-4">
+            <!-- Targets Info (left side - Split into two columns) -->
+            <div class="w-[400px] flex-shrink-0 rounded-lg border border-border-deep bg-panel-dark/60 p-4 flex flex-col">
+                <div class="flex gap-4 flex-1 min-h-0">
+                    <!-- Column 1: Bảng mạch Targets -->
+                    <div class="flex-1 flex flex-col min-w-0 border-r border-border-deep pr-3">
+                        <div class="flex items-center gap-2 mb-3 flex-shrink-0">
+                            <span class="material-symbols-outlined text-sm text-primary">filter_center_focus</span>
+                            <span class="font-label-caps text-[10px] text-industrial-gray uppercase">Bảng mạch</span>
+                            <span id="pattern-result-count" class="font-code-sm text-[10px] text-primary font-bold ml-auto">0 found</span>
+                        </div>
+                        <div id="result-targets" class="font-code-sm text-code-sm text-on-surface-variant space-y-1 flex-1 overflow-y-auto">
+                            <!-- Target items will be injected here -->
+                        </div>
+                    </div>
+                    <!-- Column 2: Linh kiện Targets -->
+                    <div class="flex-1 flex flex-col min-w-0 pl-1">
+                        <div class="flex items-center gap-2 mb-3 flex-shrink-0">
+                            <span class="material-symbols-outlined text-sm text-secondary">architecture</span>
+                            <span class="font-label-caps text-[10px] text-industrial-gray uppercase">Linh kiện</span>
+                            <span id="drawing-result-count" class="font-code-sm text-[10px] text-secondary font-bold ml-auto">0 found</span>
+                        </div>
+                        <div id="drawing-result-targets" class="font-code-sm text-code-sm text-on-surface-variant space-y-1 flex-1 overflow-y-auto">
+                            <!-- Target items will be injected here -->
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- Targets Info (right side) -->
-            <div class="w-72 flex-shrink-0 rounded-lg border border-border-deep bg-panel-dark/60 p-4 overflow-y-auto flex flex-col">
-                <div class="flex items-center gap-2 mb-3 flex-shrink-0">
-                    <span class="material-symbols-outlined text-sm text-primary">list_alt</span>
-                    <span class="font-label-caps text-label-caps text-industrial-gray uppercase">Targets</span>
-                    <span id="result-count" class="font-code-sm text-xs text-primary font-bold ml-auto">0 found</span>
+            <!-- Result Image (right side - full screen zoom) -->
+            <div class="relative flex-1 min-w-0 rounded-xl border border-border-deep bg-panel-dark/40 backdrop-blur-sm shadow-2xl overflow-hidden flex items-center justify-center">
+                <!-- View Selector Tabs (initially hidden) -->
+                <div id="image-view-tabs" class="absolute top-4 z-20 flex gap-2 bg-viewport-dark/95 backdrop-blur-md p-1.5 rounded-lg border border-border-deep shadow-lg hidden">
+                    <button id="view-tab-all" class="px-3 py-1.5 rounded text-xs font-semibold tracking-wider text-on-surface-variant hover:text-on-surface bg-transparent transition-all select-none flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#4F8EF7]"></span>
+                        ALL
+                    </button>
+                    <button id="view-tab-filtered" class="px-3 py-1.5 rounded text-xs font-semibold tracking-wider text-on-surface-variant hover:text-on-surface bg-transparent transition-all select-none flex items-center gap-1.5 hidden">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                        Find
+                    </button>
                 </div>
-                <div id="result-targets" class="font-code-sm text-code-sm text-on-surface-variant space-y-1 flex-1 overflow-y-auto">
-                    <!-- Target items will be injected here -->
-                </div>
+
+                <img id="result-image" class="w-full h-full object-contain" src="" alt="Circuit board result">
+                <!-- Decorative Corners -->
+                <div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary/40 pointer-events-none"></div>
+                <div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary/40 pointer-events-none"></div>
+                <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary/40 pointer-events-none"></div>
+                <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary/40 pointer-events-none"></div>
             </div>
         </div>
     </div>

@@ -1,14 +1,14 @@
 window.AppState = window.AppState || {};
 
-window.renderProgress = function(value) {
+window.renderProgress = function (value) {
     const progressBar = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-label');
     const progressPercent = document.getElementById('progress-pct');
     const progressDot = document.getElementById('progress-dot');
-    
-    if(!progressBar || !progressText || !progressPercent || !progressDot) return;
 
-    const pct = Math.round(Math.max(50, Math.min(100, value)));
+    if (!progressBar || !progressText || !progressPercent || !progressDot) return;
+
+    const pct = Math.round(Math.max(0, Math.min(100, value)));
 
     progressBar.style.setProperty('width', pct + '%', 'important');
     progressBar.style.setProperty('transition', 'width 150ms linear', 'important');
@@ -43,14 +43,14 @@ window.renderProgress = function(value) {
     }
 };
 
-window.stopProgress = function() {
+window.stopProgress = function () {
     if (window.AppState.progressInterval) {
         clearInterval(window.AppState.progressInterval);
         window.AppState.progressInterval = null;
     }
 };
 
-window.startProgress = function() {
+window.startProgress = function () {
     window.stopProgress();
     window.AppState.progress = 0;
     window.renderProgress(0);
@@ -69,7 +69,7 @@ window.startProgress = function() {
     }, 100);
 };
 
-window.completeProgress = function() {
+window.completeProgress = function () {
     window.stopProgress();
     window.AppState.progress = 100;
     window.renderProgress(100);

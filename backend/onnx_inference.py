@@ -51,7 +51,38 @@ def nms_cv2(boxes, scores, iou_threshold=0.3, score_threshold=0.0):
         return []
     return indices.flatten().tolist()
 
-def onnx_inference(image, onnx_path = "trained_models_fs/keypoints_onnx_32.onnx"):
+def rectangle_result(image, first_target, secon_target=None, isfind=True):
+    len_first_target = len(first_target["boxes"])
+    if isfind and secon_target is not None:
+        label =  int(secon_target["labels"][0])
+
+        boxes = [first_target["boxes"][i] for i in range(len_first_target) if first_target["labels"][i] == label]
+        scores = [first_target["scores"][i] for i in range(len_first_target) if first_target["labels"][i] == label]
+    else:
+        boxes = [
+            first_target["boxes"][i]
+            for i in range(len_first_target)
+        ]
+        scores = [
+            first_target["scores"][i]
+            for i in range(len_first_target)
+        ]
+    for bbox, score in zip(boxes, scores):
+        [x_min, y_min, x_max, y_max] = bbox
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+        cv2.putText(
+            image,
+            f"""{score:.2f}""",
+            (x_min, y_min),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 0, 255),
+            2,
+        )
+
+    return image
+
+def detect_symbols_with_onnx(image, onnx_path = "trained_models_fs/keypoints_onnx_32.onnx"):
     classes = [
         "capacitor",
         "current_source",
@@ -144,13 +175,18 @@ def onnx_inference(image, onnx_path = "trained_models_fs/keypoints_onnx_32.onnx"
     labels = [list_label[index] for index in keep_indices]
     scores = [list_score[index] for index in keep_indices]
     targets ={
-        "boxes": list_bbox,
-        "labels": list_label,
-        "scores": list_score,
+        "boxes": boxes,
+        "labels": labels,
+        "scores": scores,
     }
 
 
 
     return image, targets
+
+def onnx_inference(image, onnx_path):
+    image_result, first_targets = detect_symbols_with_onnx(image, onnx_path)
+    rectangle_image = rectangle_result(image_result, first_targets, isfind=False)
+    return rectangle_image, first_targets
 
 
