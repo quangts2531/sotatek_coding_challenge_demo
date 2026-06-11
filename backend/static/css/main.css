@@ -1,0 +1,27 @@
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #11131b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #508ff8;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #acc7ff;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, #00C48C 0%, #00966B 100%);
+    box-shadow: 0 0 12px rgba(1, 255, 77, 0.4);
+}
+
+.dot-grid {
+    background-image: radial-gradient(#2A2D3A 1px, transparent 1px);
+    background-size: 32px 32px;
+}
