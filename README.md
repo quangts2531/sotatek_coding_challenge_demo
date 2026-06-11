@@ -1,12 +1,3 @@
----
-title: ZeroMatch – Electronic Symbol Detection
-emoji: 🔍
-colorFrom: indigo
-colorTo: green
-sdk: docker
-app_port: 7860
----
-
 # ⚡ ZeroMatch – Phát Hiện Linh Kiện Điện Tử Trên Bảng Mạch
 
 [![Hugging Face Space](https://img.shields.io/badge/🤗%20Live%20Demo-HuggingFace%20Spaces-blue)](https://huggingface.co/spaces/TangSan003/detect_symbols)
