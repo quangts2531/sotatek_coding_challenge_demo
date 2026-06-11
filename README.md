@@ -11,150 +11,91 @@ app_port: 7860
 
 [![Hugging Face Space](https://img.shields.io/badge/🤗%20Live%20Demo-HuggingFace%20Spaces-blue)](https://huggingface.co/spaces/TangSan003/detect_symbols)
 
-> **Ứng dụng web** sử dụng mô hình **Object Detection** chạy trên **ONNX Runtime** để nhận diện và định vị các ký hiệu linh kiện điện tử trên ảnh sơ đồ mạch in (PCB / schematic). Người dùng tải ảnh lên qua giao diện web, hệ thống sẽ phát hiện, phân loại và đánh dấu vị trí từng linh kiện bằng bounding box.
+> **ZeroMatch** là ứng dụng web tiên tiến sử dụng mô hình **Object Detection** trên nền tảng **ONNX Runtime** để nhận diện và định vị tự động các ký hiệu linh kiện điện tử trên sơ đồ mạch in (PCB / schematic). 
+> 
+> Tải ảnh lên, hệ thống sẽ ngay lập tức phát hiện, phân loại và đóng khung (bounding box) từng linh kiện với độ chính xác cao.
 
 ---
 
 ## 📋 Mục Lục
 
-- [Tính Năng Chính](#-tính-năng-chính)
-- [Kiến Trúc Hệ Thống](#-kiến-trúc-hệ-thống)
-- [Cấu Hình](#-cấu-hình)
-- [Chạy Bằng Docker](#-chạy-bằng-docker)
-- [Cấu Trúc Thư Mục](#-cấu-trúc-thư-mục)
-- [API Endpoint](#-api-endpoint)
-- [Các Loại Linh Kiện Hỗ Trợ](#-các-loại-linh-kiện-hỗ-trợ)
-- [Tech Stack](#-tech-stack)
+- [✨ Tính Năng Nổi Bật](#-tính-năng-nổi-bật)
+- [🏗 Kiến Trúc Hệ Thống](#-kiến-trúc-hệ-thống)
+- [🚀 Hướng Dẫn Cài Đặt (Docker)](#-hướng-dẫn-cài-đặt-docker)
+- [⚙️ Cấu Hình Môi Trường](#️-cấu-hình-môi-trường)
+- [📁 Cấu Trúc Dự Án](#-cấu-trúc-dự-án)
+- [🔌 API Endpoint](#-api-endpoint)
+- [🧩 Các Loại Linh Kiện Hỗ Trợ](#-các-loại-linh-kiện-hỗ-trợ)
+- [🛠 Công Nghệ Sử Dụng (Tech Stack)](#-công-nghệ-sử-dụng-tech-stack)
 
 ---
 
-## 🎯 Tính Năng Chính
+## ✨ Tính Năng Nổi Bật
 
-### 1. Phát hiện tự động trên bảng mạch
-Tải lên ảnh **bảng mạch** (pattern) → hệ thống tự động phát hiện **tất cả linh kiện** có trong mạch và vẽ bounding box kèm điểm tin cậy (confidence score) lên ảnh.
+### 🔍 1. Quét Toàn Bộ Bảng Mạch
+Tải lên ảnh **bảng mạch (pattern)**, hệ thống sẽ tự động dò quét **tất cả linh kiện** và hiển thị bounding box cùng điểm tin cậy (confidence score) trực quan ngay trên ảnh.
 
-### 2. Nhận diện linh kiện riêng lẻ
-Tải lên ảnh **một linh kiện** (drawing) → hệ thống nhận diện loại linh kiện đó (ví dụ: điện trở, tụ điện, diode…) và trả về nhãn + confidence score.
+### 🎯 2. Nhận Diện Linh Kiện Đơn Lẻ
+Tải lên ảnh **một linh kiện mẫu (drawing)**, AI sẽ phân tích và cho bạn biết chính xác đó là linh kiện gì (điện trở, tụ điện, diode,...) kèm theo độ tin cậy.
 
-### 3. Tìm kiếm linh kiện trên bảng mạch
-Tải lên **cả hai ảnh** (bảng mạch + linh kiện), nhấn **Tìm kiếm** → hệ thống sẽ tìm và đánh dấu tất cả vị trí của loại linh kiện đó trên bảng mạch gốc. Hỗ trợ chuyển đổi giữa chế độ xem **ALL** (toàn bộ linh kiện) và **Find** (chỉ linh kiện được tìm).
+### 🔎 3. Tìm Kiếm Thông Minh (Match & Find)
+Kết hợp sức mạnh từ cả 2 tính năng trên! Tải lên **bảng mạch** và **linh kiện cần tìm**, nhấn **Tìm kiếm**. Hệ thống sẽ lọc và chỉ đánh dấu các vị trí xuất hiện của linh kiện đó trên toàn bộ bảng mạch.
+- Hỗ trợ chuyển đổi nhanh qua lại giữa **ALL** (hiển thị tất cả) và **Find** (chỉ hiển thị linh kiện đang tìm kiếm).
 
-### 4. Giao diện trực quan
-- **Sidebar trái**: Upload ảnh, cấu hình ngưỡng tin cậy (confidence threshold), bật/tắt phân tích đa quy mô và bất biến xoay.
-- **Viewport phải**: Hiển thị kết quả phát hiện với bounding box, danh sách linh kiện phát hiện được (tên + score) chia theo hai cột: Bảng mạch và Linh kiện.
-- **Thanh tiến trình**: Hiển thị trạng thái xử lý real-time.
-- **Ảnh mẫu**: Có sẵn ảnh điện trở và tụ điện để test nhanh.
+### 🖥 4. Giao Diện Premium, Thân Thiện
+- **Bảng điều khiển (Sidebar)**: Hỗ trợ kéo thả ảnh tiện lợi, tùy chỉnh độ nhạy (confidence threshold).
+- **Màn hình chính (Viewport)**: Render kết quả real-time, danh sách linh kiện thống kê trực quan chia làm 2 cột rõ ràng.
+- **Thanh tiến trình (Progress Bar)**: Hiển thị trạng thái xử lý logic.
+- **Mẫu thử nghiệm**: Tích hợp sẵn một vài ảnh mẫu để bạn có thể test ngay lập tức mà không cần tìm file.
 
 ---
 
 ## 🏗 Kiến Trúc Hệ Thống
 
-```
-┌───────────────────────────────────────────────────────┐
-│                   Browser (Frontend)                  │
-│    TailwindCSS (CDN) + Vanilla JS                     │
-│    upload.js · detection.js · progress.js · ui.js     │
-└───────────────────┬───────────────────────────────────┘
-                    │  POST /api/detect/
-                    │  (multipart/form-data)
-                    ▼
-┌───────────────────────────────────────────────────────┐
-│              Django 4.2 + DRF (Backend)               │
-│         Gunicorn · WhiteNoise · CORS · SQLite         │
-├───────────────────────────────────────────────────────┤
-│                 onnx_inference.py                      │
-│   ┌─────────────────────────────────────────────┐     │
-│   │  Preprocessing: resize 512×512 → normalize  │     │
-│   │  ONNX Runtime (CPU) → 55 class detection    │     │
-│   │  Postprocessing: NMS (OpenCV DNN)            │     │
-│   │  Output: boxes + labels + scores             │     │
-│   └─────────────────────────────────────────────┘     │
-│   Model: keypoints_onnx_32.onnx (~230 MB, Git LFS)   │
-└───────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A[Browser / Frontend<br>TailwindCSS, Vanilla JS] -->|POST /api/detect/<br>Multipart Form-Data| B(Django REST API<br>Backend)
+    B --> C{Xử lý Hình Ảnh}
+    C -->|Tiền xử lý: Resize 512x512, Normalize| D[ONNX Runtime<br>keypoints_onnx_32.onnx]
+    D -->|Hậu xử lý: Bounding Box, NMS| E(Dữ liệu trả về<br>JSON + Base64 Image)
+    E --> A
 ```
 
-### Luồng xử lý Inference
-
-1. Ảnh đầu vào được resize về **512 × 512**, chuyển sang RGB, normalize `[0, 1]`.
-2. ONNX model trả về 3 tensor: **bounding boxes**, **class labels**, **confidence scores**.
-3. Bounding boxes được scale ngược về kích thước ảnh gốc.
-4. **Non-Maximum Suppression** (NMS) qua `cv2.dnn.NMSBoxes` với IoU threshold `0.3` để loại bỏ boxes trùng.
-5. Kết quả được vẽ lên ảnh và encode base64 trả về client.
+### Luồng xử lý chi tiết (Inference Pipeline):
+1. **Tiền xử lý**: Ảnh được resize về `512x512`, chuyển hệ màu RGB và normalize giá trị pixel về dải `[0, 1]`.
+2. **Suy luận (Inference)**: ONNX model xuất ra 3 tensor cốt lõi: `bounding boxes`, `class labels`, và `confidence scores`.
+3. **Phục hồi kích thước**: Bounding boxes được map trở lại kích thước ảnh gốc.
+4. **Lọc nhiễu (NMS)**: Áp dụng thuật toán Non-Maximum Suppression (OpenCV DNN) với IoU `0.3` để loại bỏ các box trùng lặp.
+5. **Đóng gói**: Vẽ box lên ảnh gốc, chuyển đổi thành Base64 và trả về cho client.
 
 ---
 
-## ⚙ Cấu Hình
+## 🚀 Hướng Dẫn Cài Đặt (Docker)
 
-### Biến Môi Trường (`.env`)
+> [!IMPORTANT]  
+> Bạn cần cài đặt [Docker](https://docs.docker.com/get-docker/) (≥ 20.10) và [Git LFS](https://git-lfs.com/) (để tải model `.onnx`).
 
-Ứng dụng sử dụng file **`.env`** tại thư mục gốc. Các biến được hỗ trợ:
-
-| Biến | Mô tả | Giá trị mặc định |
-|------|--------|-------------------|
-| `DEBUG` | Bật/tắt chế độ debug của Django | `True` |
-| `SECRET_KEY` | Django secret key — **bắt buộc thay đổi khi deploy production** | `django-insecure-...` |
-| `ALLOWED_HOSTS` | Danh sách host được phép truy cập, phân cách bằng `,` | `*` |
-
-**File `.env` mẫu:**
-
-```env
-DEBUG=True
-SECRET_KEY=django-insecure-zeromatch-dev-key-change-in-production
-ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-```
-
-### Cấu hình Django (`settings.py`)
-
-| Tham số | Giá trị | Ghi chú |
-|---------|---------|---------|
-| Database | SQLite | File `db.sqlite3` tại thư mục backend |
-| Timezone | `Asia/Ho_Chi_Minh` | |
-| Static files | WhiteNoise | Tự động serve sau `collectstatic` |
-| CORS | `CORS_ALLOW_ALL_ORIGINS = True` | Cho phép mọi origin |
-| CSRF Trusted | `https://*.hf.space` | Để hoạt động trên Hugging Face |
-| X-Frame-Options | `ALLOWALL` | Cho phép nhúng trong iframe (HF Spaces) |
-| Max upload size | **50 MB** | `DATA_UPLOAD_MAX_MEMORY_SIZE` |
-
-### ONNX Model
-
-File model **`keypoints_onnx_32.onnx`** (~230 MB) được lưu tại `backend/trained_models_fs/` và theo dõi bởi **Git LFS**. Khi chạy trong Docker, ứng dụng tự động tìm model theo thứ tự ưu tiên:
-
-1. `/models/keypoints_onnx_32.onnx` (Docker — được copy trong Dockerfile)
-2. `/app/trained_models_fs/keypoints_onnx_32.onnx`
-3. Đường dẫn tương đối `trained_models_fs/keypoints_onnx_32.onnx`
-
----
-
-## 🐳 Chạy Bằng Docker
-
-### Yêu Cầu
-
-- [Docker](https://docs.docker.com/get-docker/) ≥ 20.10
-- [Docker Compose](https://docs.docker.com/compose/install/) ≥ 1.29 *(tuỳ chọn)*
-- [Git LFS](https://git-lfs.com/) (để pull file model `.onnx`)
-
-### Cách 1: Docker Compose (Development)
+### Môi Trường Phát Triển (Development) - Hot Reload
+Sử dụng Docker Compose cho phép bạn thay đổi code và thấy kết quả ngay lập tức.
 
 ```bash
 # 1. Clone repository
 git clone https://huggingface.co/spaces/TangSan003/detect_symbols
 cd detect_symbols
 
-# 2. Pull model từ LFS
+# 2. Tải model từ Git LFS
 git lfs pull
 
-# 3. Chỉnh sửa file .env nếu cần
+# 3. Tạo/sửa file .env (xem mục Cấu hình)
 nano .env
 
 # 4. Khởi chạy
 docker compose up --build
 ```
+> Trình duyệt: **http://localhost:8000**
 
-Ứng dụng sẽ chạy tại **http://localhost:8000**
-
-> **Lưu ý:** Chế độ Docker Compose sử dụng Django `runserver` với volume mount, phù hợp cho phát triển (hot-reload khi thay đổi code).
-
-### Cách 2: Dockerfile (Production / Hugging Face Spaces)
+### Môi Trường Thực Tế (Production / Hugging Face Spaces)
+Build trực tiếp bằng Dockerfile ở thư mục gốc (Root Dockerfile). Tối ưu hóa hiệu năng với Gunicorn và tự động migrate.
 
 ```bash
 # 1. Build image
@@ -167,66 +108,59 @@ docker run -p 7860:7860 \
   -e ALLOWED_HOSTS=* \
   zeromatch
 ```
-
-Ứng dụng sẽ chạy tại **http://localhost:7860**
-
-> Dockerfile gốc (root) tự động chạy `migrate` + `collectstatic` trong quá trình build và sử dụng **Gunicorn** (2 workers) làm WSGI server.
-
-### So sánh hai chế độ
-
-| | Docker Compose | Dockerfile (root) |
-|---|---|---|
-| Server | Django `runserver` | Gunicorn (2 workers) |
-| Port | `8000` | `7860` |
-| Volume mount | ✅ (hot-reload) | ❌ |
-| Static files | Django serve | WhiteNoise + `collectstatic` |
-| DB migration | Thủ công | Tự động khi build |
-| Mục đích | **Development** | **Production / HF Spaces** |
+> Trình duyệt: **http://localhost:7860**
 
 ---
 
-## 📁 Cấu Trúc Thư Mục
+## ⚙️ Cấu Hình Môi Trường
 
-```
+### Biến Môi Trường (`.env`)
+Tạo file `.env` tại thư mục gốc của dự án:
+
+| Biến | Ý Nghĩa | Giá trị Mặc Định |
+|------|---------|-------------------|
+| `DEBUG` | Kích hoạt chế độ debug Django | `True` |
+| `SECRET_KEY` | Khóa bảo mật (Phải đổi khi deploy) | `django-insecure-...` |
+| `ALLOWED_HOSTS` | Các tên miền được phép truy cập | `*` |
+
+### Quản Lý Tệp Tĩnh (Static Files)
+- Trong môi trường Production (`DEBUG=False`), hệ thống tự động sử dụng **WhiteNoise** để phân phối các tệp tĩnh (CSS, JS, hình ảnh) mà không cần cấu hình thêm Nginx.
+
+### Vị Trí Lưu Trữ Mô Hình (ONNX Model)
+File model `keypoints_onnx_32.onnx` (~230MB) được Git LFS theo dõi. Hệ thống sẽ tự tìm kiếm mô hình theo các đường dẫn ưu tiên:
+1. `/models/keypoints_onnx_32.onnx` (Trong Docker Container)
+2. `/app/trained_models_fs/keypoints_onnx_32.onnx`
+3. `trained_models_fs/keypoints_onnx_32.onnx` (Local)
+
+---
+
+## 📁 Cấu Trúc Dự Án
+
+```text
 .
-├── Dockerfile                  # Production Dockerfile (Hugging Face Spaces)
-├── docker-compose.yml          # Development Docker Compose
-├── .env                        # Biến môi trường
-├── .gitattributes              # Git LFS tracking cho file .onnx
-├── .gitignore
+├── Dockerfile                  # Cấu hình build cho Production (Hugging Face Spaces)
+├── docker-compose.yml          # Cấu hình môi trường Development
+├── .env                        # File biến môi trường (cần tạo)
+├── .gitattributes              # Theo dõi file lớn bằng Git LFS
 │
 └── backend/
-    ├── manage.py               # Django CLI
-    ├── requirements.txt        # Python dependencies
-    ├── onnx_inference.py       # ONNX inference + NMS pipeline
-    ├── dockerfile              # Backend-only Dockerfile (dùng bởi docker-compose)
+    ├── manage.py               # Công cụ quản lý Django
+    ├── requirements.txt        # Các thư viện Python cần thiết
+    ├── onnx_inference.py       # Chứa logic xử lý mô hình ONNX & NMS
     │
-    ├── trained_models_fs/      # Model ONNX (~230 MB, Git LFS)
-    │   └── keypoints_onnx_32.onnx
+    ├── trained_models_fs/      # Chứa file mô hình (.onnx)
     │
-    ├── core/                   # Django project config
-    │   ├── settings.py         # Cấu hình chính (DB, CORS, static, upload...)
-    │   ├── urls.py             # Root URL routing
-    │   └── wsgi.py             # WSGI entry point
+    ├── core/                   # Cấu hình hệ thống Django (settings, urls, wsgi)
     │
-    ├── api/                    # Django REST API
-    │   ├── views.py            # Logic: index, detect (single/dual mode)
-    │   └── urls.py             # API URL routing
+    ├── api/                    # Xử lý API RESTful (nhận diện, trả kết quả)
     │
-    ├── templates/              # Django HTML templates
-    │   ├── base.html           # Layout chính (sidebar + viewport + scripts)
-    │   └── index.html          # Trang kết quả detection
+    ├── templates/              # Giao diện HTML (base.html, index.html)
     │
-    ├── static/
-    │   ├── css/main.css        # Custom CSS bổ sung
-    │   ├── js/
-    │   │   ├── ui.js           # Sidebar interactions, system status
-    │   │   ├── upload.js       # Drag-drop & file upload handling
-    │   │   ├── progress.js     # Progress bar animation
-    │   │   └── detection.js    # API call, result rendering, tab switching
-    │   └── image/              # Ảnh mẫu tĩnh
-    │
-    └── image/                  # Ảnh test (điện trở, tụ điện)
+    └── static/                 # Tài nguyên tĩnh (CSS, JS)
+        └── js/
+            ├── ui.js           # Điều khiển giao diện
+            ├── upload.js       # Xử lý kéo/thả ảnh
+            └── detection.js    # Tương tác API và render kết quả
 ```
 
 ---
@@ -235,26 +169,23 @@ docker run -p 7860:7860 \
 
 ### `POST /api/detect/`
 
-Nhận ảnh và trả về kết quả phát hiện linh kiện.
+Nhận đầu vào là hình ảnh (Bảng mạch / Linh kiện) và trả về kết quả định vị.
 
 **Content-Type:** `multipart/form-data`
 
-| Field | Kiểu | Bắt buộc | Mô tả |
-|-------|------|----------|-------|
-| `pattern` | file (image) | Không* | Ảnh bảng mạch gốc |
-| `drawing` | file (image) | Không* | Ảnh linh kiện cần tìm |
+| Trường (Field) | Loại | Bắt Buộc | Mô Tả |
+|----------------|------|----------|-------|
+| `pattern` | file | Không* | Hình ảnh tổng thể của bảng mạch |
+| `drawing` | file | Không* | Hình mẫu của linh kiện cần tìm kiếm |
+> *\* Ít nhất một trong hai trường phải có dữ liệu.*
 
-> \* Ít nhất một trong hai field phải có giá trị.
+**Cơ chế hoạt động:**
+- Nếu chỉ gửi `pattern`: Trả về tất cả các linh kiện tìm thấy.
+- Nếu chỉ gửi `drawing`: Nhận diện và trả về thông tin loại linh kiện đó (chỉ lấy kết quả tốt nhất).
+- Nếu gửi cả 2: Lọc và trả về vị trí của loại linh kiện đó trên toàn bộ `pattern`.
 
-**Ba chế độ hoạt động:**
-
-| Chế độ | Input | Hành vi |
-|--------|-------|---------|
-| Chỉ bảng mạch | `pattern` only | Phát hiện tất cả linh kiện trên bảng mạch |
-| Chỉ linh kiện | `drawing` only | Nhận diện loại linh kiện (giữ best score) |
-| Tìm kiếm | `pattern` + `drawing` | Phát hiện linh kiện trên bảng mạch, lọc theo loại linh kiện đã nhận diện |
-
-**Response mẫu (JSON):**
+<details>
+<summary><b>📄 Xem mẫu kết quả JSON trả về</b></summary>
 
 ```json
 {
@@ -274,51 +205,34 @@ Nhận ảnh và trả về kết quả phát hiện linh kiện.
   "inference_time_ms": 320
 }
 ```
+</details>
 
 ---
 
-## 🔧 Các Loại Linh Kiện Hỗ Trợ
+## 🧩 Các Loại Linh Kiện Hỗ Trợ
 
-Mô hình nhận diện **55 loại linh kiện điện tử**, bao gồm:
+Mô hình có khả năng nhận diện **55 loại linh kiện khác nhau**, bao gồm:
 
-| Nhóm | Linh kiện |
-|------|-----------|
-| **Thụ động** | `resistor`, `capacitor`, `capacitor_polarized`, `variable_capacitor`, `inductor`, `iron_core_inductor`, `variable_resistor`, `potentiometer`, `thermistor` |
-| **Bán dẫn** | `diode`, `led`, `schottky_zener_diode`, `transistor`, `npn_transistor`, `pnp_transistor`, `mosfet` |
-| **Nguồn** | `voltage_source`, `current_source`, `ac_current`, `dependant_current`, `dependant_voltage`, `ground` |
-| **Cổng logic** | `and_gate`, `or_gate`, `not_gate`, `nand_gate`, `nor_gate`, `xor_gate`, `xnor_gate` |
-| **Khuếch đại** | `operational_amplifier`, `amplifier` |
-| **Chuyển mạch** | `switch`, `connector` |
-| **Biến áp / Cuộn** | `transformer` |
-| **Bảo vệ** | `fuse` |
-| **Đo lường** | `amperimeter`, `voltimeter`, `wattimeter`, `ohmmeter`, `galvanometer`, `frequency_meter` |
-| **Hiển thị / Âm thanh** | `light`, `speaker`, `buzzer`, `electric_bell`, `7_segments`, `microphone` |
-| **Khác** | `antenna`, `crystal`, `generator`, `motor`, `ldr`, `heating_element`, `magnetron`, `clock`, `box`, `volt`, `unknown`, `not_duplicate` |
+| Nhóm Phân Loại | Ký Hiệu Linh Kiện |
+|----------------|-------------------|
+| **Thụ Động** | `resistor`, `capacitor`, `capacitor_polarized`, `variable_capacitor`, `inductor`, `iron_core_inductor`, `variable_resistor`, `potentiometer`, `thermistor` |
+| **Bán Dẫn** | `diode`, `led`, `schottky_zener_diode`, `transistor`, `npn_transistor`, `pnp_transistor`, `mosfet` |
+| **Nguồn Cấp** | `voltage_source`, `current_source`, `ac_current`, `dependant_current`, `dependant_voltage`, `ground` |
+| **Cổng Logic** | `and_gate`, `or_gate`, `not_gate`, `nand_gate`, `nor_gate`, `xor_gate`, `xnor_gate` |
+| **Khuếch Đại** | `operational_amplifier`, `amplifier` |
+| **Khác** | `switch`, `connector`, `transformer`, `fuse`, `antenna`, `motor`, `speaker`, `microphone`, v.v... |
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 Công Nghệ Sử Dụng (Tech Stack)
 
-| Layer | Công nghệ | Phiên bản |
-|-------|-----------|-----------|
-| Frontend | HTML + TailwindCSS (CDN) + Vanilla JavaScript | — |
-| Typography | Space Grotesk + JetBrains Mono (Google Fonts) | — |
-| Backend | Django + Django REST Framework | 4.2.9 / 3.14.0 |
-| Inference | ONNX Runtime (CPU) | 1.17.1 |
-| Image Processing | OpenCV (headless) + NumPy + Pillow | 4.9.0 / 1.26.4 / 10.2.0 |
-| WSGI Server | Gunicorn | 21.2.0 |
-| Static Files | WhiteNoise | 6.6.0 |
-| CORS | django-cors-headers | 4.3.1 |
-| Containerization | Docker + Docker Compose | — |
-| Model Storage | Git LFS | — |
-| Hosting | Hugging Face Spaces (Docker SDK) | — |
+| Lớp (Layer) | Công Nghệ / Thư Viện | Phiên Bản |
+|-------------|----------------------|-----------|
+| **Frontend** | HTML5, TailwindCSS, Vanilla JS | Lớp mới nhất |
+| **Backend** | Django, Django REST Framework | 4.2.9 / 3.14.0 |
+| **Inference** | ONNX Runtime (CPU) | 1.17.1 |
+| **Xử lý Ảnh** | OpenCV (Headless), NumPy, Pillow | 4.9.0 / 1.26.4 / 10.2.0 |
+| **Server** | Gunicorn, WhiteNoise | 21.2.0 / 6.6.0 |
 
 ---
-
-## 📜 License
-
-*(Sẽ được bổ sung.)*
-
----
-
-*Được phát triển phục vụ Sotatek Coding Challenge.*
+*Dự án được xây dựng và tối ưu nhằm phục vụ mục tiêu xử lý ảnh sơ đồ kỹ thuật.*
